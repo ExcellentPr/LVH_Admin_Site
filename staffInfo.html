@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Staff Information - LVH Admin</title>
+
+  <!-- Styles -->
+  <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" />
+  <link href="css/styles.css" rel="stylesheet" />
+  <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/8.2.7/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.7/firebase-database.js"></script>
+
+  <!-- SheetJS for Excel Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAmfC2pEUrToIahPxEwHUcf5w35digazzs",
+      authDomain: "limphack-f98fd.firebaseapp.com",
+      databaseURL: "https://limphack-f98fd-default-rtdb.firebaseio.com",
+      projectId: "limphack-f98fd",
+      storageBucket: "limphack-f98fd.appspot.com",
+      messagingSenderId: "291693080426",
+      appId: "1:291693080426:web:be8c448ed33b6211bf7f13"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+
+<body class="sb-nav-fixed" onload="loadStaff()">
+  <!-- Top Nav -->
+  <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <a class="navbar-brand ps-3" href="dashboard.html">LVH Admin</a>
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#"><i class="fas fa-bars"></i></button>
+  </nav>
+
+  <!-- Sidebar & Main -->
+  <div id="layoutSidenav">
+    <!-- Sidebar -->
+    <div id="layoutSidenav_nav">
+      <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+        <div class="sb-sidenav-menu">
+          <div class="nav">
+            <div class="sb-sidenav-menu-heading">Core</div>
+            <a class="nav-link" href="dashboard.html">
+              <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+              Hackers
+            </a>
+            <a class="nav-link" href="posters.html">
+              <div class="sb-nav-link-icon"><i class="fas fa-image"></i></div>
+              Posters
+            </a>
+            <a class="nav-link active" href="staff.html">
+              <div class="sb-nav-link-icon"><i class="fa fa-users"></i></div>
+              Staff Information
+            </a>
+          </div>
+        </div>
+        <div class="sb-sidenav-footer">
+          <div class="small">Logged in as:</div>
+          Administrator
+        </div>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div id="layoutSidenav_content">
+      <main>
+        <div class="container-fluid px-4">
+          <h1 class="mt-4">Staff Information</h1>
+          <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div>
+                <i class="fas fa-table me-1"></i>
+                LVH Staff
+              </div>
+              <button class="btn btn-success btn-sm" onclick="downloadStaffExcel()">
+                <i class="fas fa-file-excel me-1"></i> Download Excel
+              </button>
+            </div>
+            <div class="card-body">
+              <table id="staffTable" class="table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Surname</th>
+                    <th>Staff Number</th>
+                    <th>Email</th>
+                    <th>Gender</th>
+                    <th>Institution</th>
+                    <th>Department</th>
+                    <th>Main Category</th>
+                    <th>Sub Category</th>
+                  </tr>
+                </thead>
+                <tbody id="staffData">
+                  <!-- Populated via Firebase -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+      <footer class="py-4 bg-light mt-auto">
+        <div class="container-fluid px-4">
+          <div class="d-flex align-items-center justify-content-between small">
+            <div class="text-muted">&copy; 2025 LVH Admin</div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Firebase Logic -->
+  <script>
+    function loadStaff() {
+      const db = firebase.database();
+      const staffRef = db.ref("staff");
+      const tableBody = document.getElementById("staffData");
+
+      staffRef.once("value", (snapshot) => {
+        const data = snapshot.val();
+        for (const key in data) {
+          const staff = data[key];
+          const row = document.createElement("tr");
+
+          row.innerHTML = `
+            <td>${staff.name || ''}</td>
+            <td>${staff.surname || ''}</td>
+            <td>${staff.staffNumber || ''}</td>
+            <td>${staff.email || ''}</td>
+            <td>${staff.gender || ''}</td>
+            <td>${staff.institution || ''}</td>
+            <td>${staff.department || ''}</td>
+            <td>${staff.mainCategory || ''}</td>
+            <td>${staff.subCategory || ''}</td>
+          `;
+          tableBody.appendChild(row);
+        }
+      }, (error) => {
+        console.error("Error loading staff data:", error);
+      });
+    }
+
+    function downloadStaffExcel() {
+      const db = firebase.database();
+      const staffRef = db.ref("staff");
+
+      staffRef.once("value", (snapshot) => {
+        const data = snapshot.val();
+        const staffArray = [];
+
+        // Header
+        staffArray.push([
+          "Name", "Surname", "Staff Number", "Email", "Gender",
+          "Institution", "Department", "Main Category", "Sub Category"
+        ]);
+
+        // Rows
+        for (const key in data) {
+          const staff = data[key];
+          staffArray.push([
+            staff.name || '',
+            staff.surname || '',
+            staff.staffNumber || '',
+            staff.email || '',
+            staff.gender || '',
+            staff.institution || '',
+            staff.department || '',
+            staff.mainCategory || '',
+            staff.subCategory || ''
+          
+          ]);
+        }
+
+        const worksheet = XLSX.utils.aoa_to_sheet(staffArray);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Staff");
+
+        XLSX.writeFile(workbook, "LVH_Staff_Info.xlsx");
+      });
+    }
+  </script>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+  <script src="js/datatables-simple-demo.js"></script>
+  <script src="js/scripts.js"></script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Dashboard - SB Admin</title>
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<style>
+	.btn1{
+        margin-top:30px;
+		margin-left:20px;
+	}
+	
+	
+	
+	form{
+        margin-top:60px;
+    }
+	
+	</style>
+	<script>
+	function goBack(){
+		window.location.href = "dashboard.html";
+	}
+    function validatePost()
+        {
+            var p =  document.getElementById('progressBar').textContent;  
+
+           
+
+
+            if(p.localeCompare("upload:100%...")==0){
+                swal({
+    title:"Event Posted!!",
+    text:"congrats.",
+    icon :"success",
+    button:true,
+    dangerMode: true,
+    }).then((isOkay)=> {
+    if(isOkay)
+    {
+                    
+        window.location.replace("dashboard.html");
+
+    }
+    });
+
+    return false;
+
+            }else{
+                swal({
+    title:"Uploading has not been done yet!!",
+    text:"Please upload a picture.",
+    icon :"error",
+    button:true,
+    dangerMode: true,
+    }).then((isOkay)=> {
+    if(isOkay)
+    {
+
+    }
+    });
+
+    return false;
+
+            }
+        }
+	</script>
+	
+
+
+        <script src="https://www.gstatic.com/firebasejs/8.2.7/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.2.7/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.2.7/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.2.7/firebase-storage.js"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+	<script src="uploadscript.js"></script>
+
+
+    </head>
+    <body class="sb-nav-fixed">
+    <!-- TOP NAVBAR -->
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+        <a class="navbar-brand ps-3" href="dashboard.html">LVH Admin</a>
+        <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="login.html">Logout</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- MAIN LAYOUT -->
+    <div id="layoutSidenav">
+        <!-- SIDEBAR -->
+        <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                <div class="sb-sidenav-menu">
+                    <div class="nav">
+                        <div class="sb-sidenav-menu-heading">CORE</div>
+                        <a class="nav-link" href="dashboard.html">
+                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            Hackers
+                        </a>
+                        <a class="nav-link" href="createAnnouncement.html">
+                            <div class="sb-nav-link-icon"><i class="fa fa-plus-square"></i></div>
+                            Posters
+                        </a>
+                        <a class="nav-link" href="staffInfo.html">
+                            <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                            Staff Information
+                        </a>
+                        
+                    </div>
+                </div>
+                <div class="sb-sidenav-footer">
+                    <div class="small">Logged in as:</div>
+                    Administrator
+                </div>
+            </nav>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid px-4">
+                    <h1 class="mt-4">Create Poster</h1>
+                    <form autocomplete="off" enctype="multipart/form-data">
+                        <div class="form-group mb-3">
+                            <label for="title">Title</label>
+                            <input class="form-control" type="text" name="title" id="title" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="image">Image</label>
+                            <input class="form-control" type="file" name="image" id="image" accept=".jpg, .jpeg, .png">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="postDate">Post Date</label>
+                            <input class="form-control" type="date" name="postDate" id="postDate">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="expiryDate">Expiry Date</label>
+                            <input class="form-control" type="date" name="expiryDate" id="expiryDate">
+                        </div>
+
+                        <button class="btn btn-primary me-2" type="button" id="upload">Upload</button>
+                        <button class="btn btn-success me-2" type="button" onclick="validatePost();">Post</button>
+                        <button class="btn btn-secondary" type="button" onclick="goBack();">Back</button>
+
+                        <p id="progressBar" class="mt-2"></p>
+                    </form>
+                </div>
+            </main>
+
+            <!-- FOOTER -->
+            <footer class="py-4 bg-light mt-auto">
+                <div class="container-fluid px-4">
+                    <div class="d-flex align-items-center justify-content-between small">
+                        <div class="text-muted">Copyright &copy; Limpopo Varsity Hackathon 2022</div>
+                        <div>
+                            <a href="#">Privacy Policy</a>
+                            &middot;
+                            <a href="#">Terms &amp; Conditions</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+</body>
+
+</html>
